@@ -24,6 +24,7 @@ public:
     Matrix operator* (double rhs) const;
 
     Matrix subMatrix(int row, int col) const;
+    double cofactor(int row, int col);
     double detCal(Matrix matrix, int rows, int cols);
     double det();
     Matrix transpose() const;
@@ -181,22 +182,25 @@ Matrix Matrix::subMatrix(int row, int col) const {
     return result;
 }
 
+double Matrix::cofactor(int row, int col) {
+    assert(col >= 0 && row >= 0 && col < m_cols && row < m_rows);
+    double minor = detCal(subMatrix(row, col), m_rows - 1, m_cols - 1);
+    if((row + col) % 2 == 0)return minor;
+    else return -minor;
+}
+
 double Matrix::detCal(Matrix matrix, int rows, int cols) {
     if(rows == 1)return matrix[0][0];
     double result = 0;
     for(int i = 0; i < rows; i++) {
-        Matrix subMat = matrix.subMatrix(i, 0);
-        if(i % 2 == 0)result += matrix[i][0] * detCal(subMat, rows - 1, cols - 1);
-        else result -= matrix[i][0] * detCal(subMat, rows - 1, cols - 1);
+        result += matrix[i][0] * matrix.cofactor(i, 0);
     }
     return result;
 }
 
 double Matrix::det() {
     assert(m_cols == m_rows);
-    Matrix temp(*this);
-    double result = detCal(temp, m_rows, m_cols);
-    return result;
+    return detCal(*this, m_rows, m_cols);
 }
 
 Matrix Matrix::transpose() const {
@@ -239,6 +243,13 @@ int main() {
     double dat1[] = {2, 5, 5, -1, -1, 0, 2, 4, 3};
     Matrix mat1(dat1, 3, 3);
     cout << mat1.det() << endl; 
-    (mat1 * 2).print();
+    cout << "origin: " << endl;
+    mat1.print();
+    cout << "transpose: " << endl;
+    mat1.transpose().print();
+    cout << "adjoint: " << endl;
+    mat1.adjoint().print();
+    cout << "inverse: " << endl;
+    mat1.inverse().print();
     return 0;
 }
