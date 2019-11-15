@@ -28,7 +28,7 @@ public:
     double detCal(Matrix matrix, int rows, int cols);
     double det();
     Matrix transpose() const;
-    Matrix adjoint() const;
+    Matrix adjoint();
     Matrix inverse();
 
     void print();
@@ -213,12 +213,12 @@ Matrix Matrix::transpose() const {
     return result;
 }
 
-Matrix Matrix::adjoint() const {
+Matrix Matrix::adjoint() {
     assert(m_cols == m_rows);
     Matrix cofMat(m_rows, m_cols);
     for(int r = 0; r < m_rows; r++) {
         for(int c = 0; c < m_cols; c++) {
-            cofMat.set(subMatrix(r, c).det(), r, c);
+            cofMat.set(cofactor(r, c), r, c);
         }
     }
     return cofMat.transpose();
@@ -240,11 +240,11 @@ void Matrix::print() {
 }
 
 int main() {
-    double dat1[] = {2, 5, 5, -1, -1, 0, 2, 4, 3};
-    Matrix mat1(dat1, 3, 3);
-    cout << mat1.det() << endl; 
+    double dat1[] = {1, 3, 1, 1, 2, 5, 2, 2, 1, 3, 8, 9, 1, 3, 2, 2};
+    Matrix mat1(dat1, 4, 4);
     cout << "origin: " << endl;
     mat1.print();
+    cout << "determinant: " << mat1.det() << endl; 
     cout << "transpose: " << endl;
     mat1.transpose().print();
     cout << "adjoint: " << endl;
