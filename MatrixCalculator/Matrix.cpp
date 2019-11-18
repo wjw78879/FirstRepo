@@ -9,7 +9,7 @@ Matrix operator* (double lhs, const Matrix& rhs) {
     Matrix result(rhs);
     for(int r = 0; r < rhs.rows(); r++) {
         for(int c = 0; c < rhs.cols(); c++) {
-            result.set(rhs[r][c] * lhs, r, c);
+            result.set(result[r][c] * lhs, r, c);
         }
     }
     return result;
@@ -55,6 +55,12 @@ Matrix::Matrix(vector<vector<double>>& values, int rows, int cols) {
     }
 }
 
+Matrix::Matrix(const Matrix& other) {
+    m_data = other.data();
+    m_rows = other.rows();
+    m_cols = other.cols();
+}
+
 Matrix::~Matrix() {}
 
 void Matrix::set(double value, int row, int col) {
@@ -70,25 +76,22 @@ int Matrix::cols() const {
     return m_cols;
 }
 
-vector<double> Matrix::operator[] (int rhs) const {
+vector<vector<double>> Matrix::data() const {
+    return m_data;
+}
+
+vector<double>& Matrix::operator[] (int rhs) {
     return m_data[rhs];
 }
 
 Matrix& Matrix::operator= (const Matrix& rhs) {
     m_rows = rhs.rows();
     m_cols = rhs.cols();
-    m_data.clear();
-    for(int r = 0; r < m_rows; r++) {
-        vector<double> row;
-        for(int c = 0; c < m_cols; c++) {
-            row.push_back(rhs[r][c]);
-        }
-        m_data.push_back(row);
-    }
+    m_data = rhs.data();
     return *this;
 }
 
-Matrix Matrix::operator+ (const Matrix& rhs) const {
+Matrix Matrix::operator+ (Matrix& rhs) {
     assert(m_rows == rhs.rows() && m_cols == rhs.cols());
     Matrix result(*this);
     for(int r = 0; r < m_rows; r++) {
@@ -99,7 +102,7 @@ Matrix Matrix::operator+ (const Matrix& rhs) const {
     return result;
 }
 
-Matrix Matrix::operator- (const Matrix& rhs) const {
+Matrix Matrix::operator- (Matrix& rhs) {
     assert(m_rows == rhs.rows() && m_cols == rhs.cols());
     Matrix result(*this);
     for(int r = 0; r < m_rows; r++) {
@@ -110,7 +113,7 @@ Matrix Matrix::operator- (const Matrix& rhs) const {
     return result;
 }
 
-Matrix Matrix::operator* (const Matrix& rhs) const {
+Matrix Matrix::operator* (Matrix& rhs) {
     assert(m_cols == rhs.rows());
     Matrix result(m_rows, rhs.cols());
     for(int r = 0; r < m_rows; r++) {
@@ -123,7 +126,7 @@ Matrix Matrix::operator* (const Matrix& rhs) const {
     return result;
 }
 
-Matrix Matrix::operator* (double rhs) const {
+Matrix Matrix::operator* (double rhs) {
     Matrix result(*this);
     for(int r = 0; r < m_rows; r++) {
         for(int c = 0; c < m_cols; c++) {
@@ -133,7 +136,7 @@ Matrix Matrix::operator* (double rhs) const {
     return result;
 }
 
-Matrix Matrix::subMatrix(int row, int col) const {
+Matrix Matrix::subMatrix(int row, int col) {
     assert(col >= 0 && row >= 0 && col < m_cols && row < m_rows);
     vector<vector<double>> subMat;
     for(int r = 0; r < m_rows; r++) {
@@ -170,7 +173,7 @@ double Matrix::det() {
     return detCal(*this, m_rows, m_cols);
 }
 
-Matrix Matrix::transpose() const {
+Matrix Matrix::transpose() {
     Matrix result(m_cols, m_rows);
     for(int r = 0; r < m_rows; r++) {
         for(int c = 0; c < m_cols; c++) {
@@ -197,6 +200,45 @@ Matrix Matrix::inverse() {
     return (1.0f / determinant) * adjoint();
 }
 
+Matrix& Matrix::rowOperationMultiply(double scalar, int row) {
+    assert(scalar != 0 && row >= 0 && row < m_rows);
+    for(int c = 0; c < m_cols; c++) {
+        m_data[row][c] *= scalar;
+    }
+    return (*this);
+}
+
+Matrix& Matrix::rowOperationInterchange(int row1, int row2) {
+    assert(row1 >= 0 && row2 >= 0 && row1 < m_rows && row2 < m_rows && row1 != row2);
+    double temp = 0;
+    for(int c = 0; c < m_cols; c++) {
+        temp = m_data[row1][c];
+        m_data[row1][c] = m_data[row2][c];
+        m_data[row2][c] = temp;
+    }
+    return (*this);
+}
+
+Matrix& Matrix::rowOperationAdd(double scalar, int from, int to) {
+    assert(from >=0 && to >=0 && from < m_rows && to < m_rows && from != to);
+    for(int c = 0; c < m_cols; c++) {
+        m_data[to][c] += (scalar * m_data[from][c]);
+    }
+    return (*this);
+}
+
+Matrix& Matrix::rowEchelonForm() {
+    Matrix ref(rowEchelon((*this), 0, 0));
+    m_data = ref.data();
+    return (*this);
+}
+
+Matrix& Matrix::reducedRowEchelonForm() {
+    Matrix rref(reducedRowEchelon(*this));
+    m_data = rref.data();
+    return (*this);
+}
+
 void Matrix::print() {
     for(int r = 0; r < m_rows; r++) {
         for(int c = 0; c < m_cols; c++) {
@@ -204,4 +246,38 @@ void Matrix::print() {
         }
         cout << endl;
     }
+}
+
+Matrix rowEchelon(Matrix matrix, int proceedRows, int proceedCols) {
+    for(int r = proceedRows; r < matrix.rows(); r++) {
+        if(matrix[r][proceedCols] != 0) {
+            if(r != proceedRows)matrix.rowOperationInterchange(proceedRows, r);
+            break;
+        }
+    }
+    if(matrix[proceedRows][proceedCols] == 0) {
+        if(proceedCols == (matrix.cols() - 1))return matrix;
+        return rowEchelon(matrix, proceedRows, proceedCols + 1);
+    }
+    matrix.rowOperationMultiply(1.0f / matrix[proceedRows][proceedCols], proceedRows);
+    for(int r = proceedRows + 1; r < matrix.rows(); r++) {
+        matrix.rowOperationAdd(-1.0f * matrix[r][proceedCols] / matrix[proceedRows][proceedCols], proceedRows, r);
+    }
+    if(proceedRows == (matrix.rows() - 1) || proceedCols == (matrix.cols() - 1))return matrix;
+    return rowEchelon(matrix, proceedRows + 1, proceedCols + 1);
+}
+
+Matrix reducedRowEchelon(Matrix matrix) {
+    matrix = rowEchelon(matrix, 0, 0);
+    for(int r = matrix.rows() - 1; r >= 0; r--) {
+        for(int c = 0; c < matrix.cols(); c++) {
+            if(matrix[r][c] == 1) {
+                for(int r2 = 0; r2 < r; r2++) {
+                    matrix.rowOperationAdd(-1.0f * matrix[r2][c], r, r2);
+                }
+                break;
+            }
+        }
+    }
+    return matrix;
 }
