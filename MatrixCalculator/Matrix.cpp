@@ -19,8 +19,10 @@ Matrix::Matrix(int rows, int cols) {
     assert(rows > 0 && cols > 0);
     m_rows = rows;
     m_cols = cols;
+    m_data.reserve(rows);
     for(int r = 0; r < rows; r++) {
         vector<double> row;
+        row.reserve(cols);
         for(int c = 0; c < cols; c++) {
             row.push_back(0);
         }
@@ -33,8 +35,10 @@ Matrix::Matrix(double* values, int rows, int cols) {
     assert(values != nullptr);
     m_rows = rows;
     m_cols = cols;
+    m_data.reserve(rows);
     for(int r = 0; r < rows; r++) {
         vector<double> row;
+        row.reserve(cols);
         for(int c = 0; c < cols; c++) {
             row.push_back(values[r * cols + c]);
         }
@@ -46,8 +50,10 @@ Matrix::Matrix(vector<vector<double>>& values, int rows, int cols) {
     assert(rows > 0 && cols > 0);
     m_rows = rows;
     m_cols = cols;
+    m_data.reserve(rows);
     for(int r = 0; r < rows; r++) {
         vector<double> row;
+        row.reserve(cols);
         for(int c = 0; c < cols; c++) {
             row.push_back(values[r][c]);
         }
