@@ -7,6 +7,7 @@
 using namespace std;
 
 class Matrix {
+    friend ostream& operator<< (ostream& o, const Matrix& c);
 public:
     Matrix();
     Matrix(int rows, int cols);
@@ -23,9 +24,9 @@ public:
     vector<vector<double>> data() const;
 
     vector<double>& operator[] (int rhs);
-    Matrix operator+ (Matrix& rhs);
-    Matrix operator- (Matrix& rhs);
-    Matrix operator* (Matrix& rhs);
+    Matrix operator+ (Matrix rhs);
+    Matrix operator- (Matrix rhs);
+    Matrix operator* (Matrix rhs);
     Matrix operator* (double rhs);
 
     Matrix subMatrix(int row, int col);
@@ -49,7 +50,7 @@ private:
     vector<vector<double>> m_data;
 };
 
-Matrix operator* (double lhs, Matrix& rhs);
+Matrix operator* (double lhs, Matrix rhs);
 
 Matrix rowEchelon(Matrix matrix, int proceedRows, int proceedCols);
 Matrix reducedRowEchelon(Matrix matrix);

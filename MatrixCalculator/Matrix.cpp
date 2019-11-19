@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Matrix operator* (double lhs, const Matrix& rhs) {
+Matrix operator* (double lhs, Matrix rhs) {
     Matrix result(rhs);
     for(int r = 0; r < rhs.rows(); r++) {
         for(int c = 0; c < rhs.cols(); c++) {
@@ -16,6 +16,51 @@ Matrix operator* (double lhs, const Matrix& rhs) {
         }
     }
     return result;
+}
+
+ostream& operator<< (ostream& o, const Matrix& mat) {
+    double epsilon = 0.000001f;
+    vector<vector<string>> strVec;
+    for(int r = 0; r < mat.m_rows; r++) {
+        vector<string> temp;
+        for(int c = 0; c < mat.m_cols; c++) {
+            double num = mat.m_data[r][c];
+            if(fabs(num) < epsilon)num = 0.0f;
+            ostringstream strs;
+            strs << num;
+            temp.push_back(strs.str());
+        }
+        strVec.push_back(temp);
+    }
+    vector<int> maxLength(mat.m_cols, 0);
+    for(int c = 0; c < mat.m_cols; c++) {
+        maxLength[c] = strVec[0][c].length();
+        for(int r = 1; r < mat.m_rows; r++) {
+            size_t temp = strVec[r][c].length();
+            if(temp > maxLength[c])maxLength[c] = temp;
+        }
+    }
+    size_t lineLength = 3;
+    for(int c = 0; c < mat.m_cols; c++)lineLength += (maxLength[c] + 1);
+    cout << "/ ";
+    for(int i = 0; i < lineLength - 4; i++)cout << " ";
+    cout << " \\" << endl;
+    for(int r = 0; r < mat.m_rows; r++) {
+        cout << "| ";
+        for(int c = 0; c < mat.m_cols; c++) {
+            size_t strLen = strVec[r][c].length();
+            for(int i = 0; i < (maxLength[c] - strLen) / 2; i++)cout << " ";
+            cout << strVec[r][c];
+            int times = 0;
+            if((maxLength[c] - strLen) % 2 == 0)times = (maxLength[c] - strLen) / 2;
+            else times = (maxLength[c] - strLen) / 2 + 1;
+            for(int i = 0; i < times + 1; i++)cout << " ";
+        }
+        cout << "|" << endl;
+    }
+    cout << "\\";
+    for(int i = 0; i < lineLength - 2; i++)cout << " ";
+    cout << "/" << endl;
 }
 
 Matrix::Matrix() {
@@ -105,7 +150,7 @@ Matrix& Matrix::operator= (const Matrix& rhs) {
     return *this;
 }
 
-Matrix Matrix::operator+ (Matrix& rhs) {
+Matrix Matrix::operator+ (Matrix rhs) {
     assert(m_rows == rhs.rows() && m_cols == rhs.cols());
     Matrix result(*this);
     for(int r = 0; r < m_rows; r++) {
@@ -116,7 +161,7 @@ Matrix Matrix::operator+ (Matrix& rhs) {
     return result;
 }
 
-Matrix Matrix::operator- (Matrix& rhs) {
+Matrix Matrix::operator- (Matrix rhs) {
     assert(m_rows == rhs.rows() && m_cols == rhs.cols());
     Matrix result(*this);
     for(int r = 0; r < m_rows; r++) {
@@ -127,7 +172,12 @@ Matrix Matrix::operator- (Matrix& rhs) {
     return result;
 }
 
-Matrix Matrix::operator* (Matrix& rhs) {
+Matrix Matrix::operator* (Matrix rhs) {
+    if(m_rows == m_cols && m_rows == 1) {
+        return rhs * m_data[0][0];
+    } else if(rhs.rows() == rhs.cols() && rhs.rows() == 1) {
+        return (*this) * rhs[0][0];
+    }
     assert(m_cols == rhs.rows());
     Matrix result(m_rows, rhs.cols());
     for(int r = 0; r < m_rows; r++) {
