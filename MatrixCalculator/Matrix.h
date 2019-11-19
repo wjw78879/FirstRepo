@@ -8,6 +8,7 @@ using namespace std;
 
 class Matrix {
 public:
+    Matrix();
     Matrix(int rows, int cols);
     Matrix(vector<vector<double>>& values, int rows, int cols);
     Matrix(double* values, int rows, int cols);

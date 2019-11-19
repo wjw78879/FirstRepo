@@ -1,6 +1,9 @@
 #include<iostream>
 #include<vector>
 #include<cassert>
+#include<string>
+#include<sstream>
+#include<cmath>
 #include "Matrix.h"
 
 using namespace std;
@@ -13,6 +16,11 @@ Matrix operator* (double lhs, const Matrix& rhs) {
         }
     }
     return result;
+}
+
+Matrix::Matrix() {
+    m_rows = 0;
+    m_cols = 0;
 }
 
 Matrix::Matrix(int rows, int cols) {
@@ -246,12 +254,48 @@ Matrix& Matrix::reducedRowEchelonForm() {
 }
 
 void Matrix::print() {
+    double epsilon = 0.000001f;
+    vector<vector<string>> strVec;
     for(int r = 0; r < m_rows; r++) {
+        vector<string> temp;
         for(int c = 0; c < m_cols; c++) {
-            cout << m_data[r][c] << " ";
+            double num = m_data[r][c];
+            if(fabs(num) < epsilon)num = 0.0f;
+            ostringstream strs;
+            strs << num;
+            temp.push_back(strs.str());
         }
-        cout << endl;
+        strVec.push_back(temp);
     }
+    vector<int> maxLength(m_cols, 0);
+    for(int c = 0; c < m_cols; c++) {
+        maxLength[c] = strVec[0][c].length();
+        for(int r = 1; r < m_rows; r++) {
+            size_t temp = strVec[r][c].length();
+            if(temp > maxLength[c])maxLength[c] = temp;
+        }
+    }
+    size_t lineLength = 3;
+    for(int c = 0; c < m_cols; c++)lineLength += (maxLength[c] + 1);
+    cout << "/ ";
+    for(int i = 0; i < lineLength - 4; i++)cout << " ";
+    cout << " \\" << endl;
+    for(int r = 0; r < m_rows; r++) {
+        cout << "| ";
+        for(int c = 0; c < m_cols; c++) {
+            size_t strLen = strVec[r][c].length();
+            for(int i = 0; i < (maxLength[c] - strLen) / 2; i++)cout << " ";
+            cout << strVec[r][c];
+            int times = 0;
+            if((maxLength[c] - strLen) % 2 == 0)times = (maxLength[c] - strLen) / 2;
+            else times = (maxLength[c] - strLen) / 2 + 1;
+            for(int i = 0; i < times + 1; i++)cout << " ";
+        }
+        cout << "|" << endl;
+    }
+    cout << "\\";
+    for(int i = 0; i < lineLength - 2; i++)cout << " ";
+    cout << "/" << endl;
 }
 
 Matrix rowEchelon(Matrix matrix, int proceedRows, int proceedCols) {

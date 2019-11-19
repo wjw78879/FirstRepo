@@ -7,6 +7,7 @@
 using namespace std;
 
 int main() {
-    double dat[] = {0};
+    MatricesHolder holder;
+    holder.run();
     return 0;
 }

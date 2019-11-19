@@ -2,23 +2,27 @@
 #define MATRICESHOLDER_H
 
 #include<iostream>
+#include<vector>
 #include "Matrix.h"
+
+using namespace std;
 
 class MatricesHolder {
 public:
     MatricesHolder();
     ~MatricesHolder();
 
-    Matrix& operator[] (int rhs) const;
-
     void add();
-    void set(int number);
+    void set();
+    void cal();
 
-    void print(int number);
-    void list();
+    void run();
 private:
     vector<Matrix> m_matrices;
-    int m_numMatrices;
+    Matrix m_answer;
 };
+
+int getInt(int lowerBound, int upperBound);
+    double getDouble();
 
 #endif
