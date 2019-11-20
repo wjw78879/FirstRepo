@@ -61,6 +61,7 @@ ostream& operator<< (ostream& o, const Matrix& mat) {
     cout << "\\";
     for(int i = 0; i < lineLength - 2; i++)cout << " ";
     cout << "/" << endl;
+    return o;
 }
 
 Matrix::Matrix() {
