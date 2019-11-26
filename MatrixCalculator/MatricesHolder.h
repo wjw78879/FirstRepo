@@ -7,7 +7,7 @@
 
 using namespace std;
 
-enum errs {no_err, bad_bracket_pairing, no_such_matrix, no_such_temp};
+enum errs {no_err, bad_bracket_pairing, no_such_matrix, no_such_temp, bad_operator};
 
 class MatricesHolder {
 public:
@@ -21,6 +21,7 @@ public:
     void ref();
     void rref();
     void det();
+    void clear();
 
     void run();
 private:
@@ -31,5 +32,6 @@ private:
 
 int getInt(int lowerBound, int upperBound);
 double getDouble();
+char getChar();
 
 #endif

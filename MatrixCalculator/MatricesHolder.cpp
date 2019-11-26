@@ -43,6 +43,20 @@ double getDouble() {
     }
 }
 
+char getChar() {
+    char res = 0;
+    while(1) {
+        res = getchar();
+        string line;
+        getline(cin, line);
+        if(line.length() > 0) {
+            cout << "Illegal input" << endl;
+        } else {
+            return res;
+        }
+    }
+}
+
 void MatricesHolder::add() {
     int rows, cols;
     cout << "Rows: ";
@@ -89,22 +103,37 @@ void MatricesHolder::cal() {
     string expr;
     getline(cin, expr);
     Matrix ans(execute(expr));
+    m_temp.clear();
     if(m_errcode != no_err) {
         cout << "Error: ";
         switch(m_errcode) {
         case bad_bracket_pairing: cout << "Bad bracket pairing."; break;
         case no_such_matrix: cout << "No such matrix."; break;
         case no_such_temp: cout << "No such temp."; break;
+        case bad_operator: cout << "Bad operator."; break;
         }
         cout << endl;
         m_errcode = no_err;
     } else {
         cout << "Answer:" << endl << ans;
+        cout << "Do you want to save this answer matrix? (y/n): ";
+        while(1) {
+            char op = getChar();
+            if(op == 'y') {
+                m_matrices.push_back(ans);
+            } else if (op != 'n') {
+                cout << "Illegal input." << endl;
+                continue;
+            }
+            break;
+        }
     }
 }
 
 Matrix MatricesHolder::execute(string expr) {
+    //cout << "executing \"" << expr << "\"" << endl;
     //execute ()s
+    //cout << "executing ()s..." << endl;
     //finds
     vector<int> leftParenthesesPos;
     vector<int> rightParenthesesPos;
@@ -113,6 +142,10 @@ Matrix MatricesHolder::execute(string expr) {
             leftParenthesesPos.push_back(i);
         }
         if(expr[i] == ')') {
+            if(leftParenthesesPos.size() <= rightParenthesesPos.size()) {
+                m_errcode = bad_bracket_pairing;
+                return Matrix();
+            }
             rightParenthesesPos.push_back(i);
         }
     }
@@ -122,19 +155,46 @@ Matrix MatricesHolder::execute(string expr) {
         return Matrix();
     }
     if(leftParenthesesPos.size() != 0) {
-        string next(expr.substr(leftParenthesesPos[0] + 1, rightParenthesesPos[0] - leftParenthesesPos[0] - 1));
-        expr.erase(leftParenthesesPos[0], rightParenthesesPos[0] - leftParenthesesPos[0] + 1);
+        string next(expr.substr(leftParenthesesPos[0] + 1, rightParenthesesPos[rightParenthesesPos.size() - 1] - leftParenthesesPos[0] - 1));
+        m_temp.push_back(execute(next));
+        expr.erase(leftParenthesesPos[0], rightParenthesesPos[rightParenthesesPos.size() - 1] - leftParenthesesPos[0] + 1);
         string sign("t");
-        sign.append(to_string(m_temp.size()));
+        sign.append(to_string(m_temp.size() - 1));
         if(expr.length() > leftParenthesesPos[0]) {
             expr.insert(leftParenthesesPos[0], sign);
         } else {
             expr.append(sign);
         }
-        m_temp.push_back(Matrix(execute(next)));
         return execute(expr);
     }
+    //execute operators
+    //cout << "executing operators..." << endl;
+    //det, adj, tsp, inv
+    for(int i = 0; i < (int)expr.length() - 4; i++) {
+        if(expr[i] == 'd' && expr[i + 1] == 'e' && expr[i + 2] == 't' ||
+        expr[i] == 'a' && expr[i + 1] == 'd' && expr[i + 2] == 'j' ||
+        expr[i] == 't' && expr[i + 1] == 's' && expr[i + 2] == 'p' ||
+        expr[i] == 'i' && expr[i + 1] == 'n' && expr[i + 2] == 'v') {
+            char op = expr[i];
+            string next(expr.substr(i + 3, 2));
+            switch(op) {
+            case 'd': m_temp.push_back(Matrix(execute(next).det())); break;
+            case 'a': m_temp.push_back(execute(next).adjoint()); break;
+            case 't': m_temp.push_back(execute(next).transpose()); break;
+            case 'i': m_temp.push_back(execute(next).inverse()); break;
+            }
+            expr.erase(i, 5);
+            string sign("t");
+            sign.append(to_string(m_temp.size() - 1));
+            if(expr.length() > i) {
+                expr.insert(i, sign);
+            } else {
+                expr.append(sign);
+            }
+        }
+    }
     //execute +,-s
+    //cout << "executing +,-s..." << endl;
     //finds
     int plusMinusPos = -1;
     bool isPlus;
@@ -157,6 +217,7 @@ Matrix MatricesHolder::execute(string expr) {
         else return execute(left) - execute(right);
     }
     //execute *s
+    //cout << "executing *s..." << endl;
     //finds
     int multiplePos = -1;
     for(int i = 0; i < expr.length(); i++) {
@@ -172,7 +233,8 @@ Matrix MatricesHolder::execute(string expr) {
         return execute(left) * execute(right);
     }
     //execute signs
-    for(int i= 0; i < expr.length(); i++) {
+    //cout << "executing signs..." << endl;
+    for(int i = 0; i < expr.length(); i++) {
         if(expr[i] == 'm') {
             stringstream strs(expr.substr(i + 1, expr.length() - i - 1));
             int number = 0;
@@ -186,7 +248,7 @@ Matrix MatricesHolder::execute(string expr) {
             stringstream strs(expr.substr(i + 1, expr.length() - i - 1));
             int number = 0;
             strs >> number;
-            if(number < 0 || number >= m_matrices.size()) {
+            if(number < 0 || number >= m_temp.size()) {
                 m_errcode = no_such_temp;
                 return Matrix();
             }
@@ -194,6 +256,7 @@ Matrix MatricesHolder::execute(string expr) {
         }
     }
     //execute numbers
+    //cout << "executing numbers..." << endl;
     double scalar = 0;
     stringstream strs(expr);
     strs >> scalar;
@@ -232,6 +295,11 @@ void MatricesHolder::det() {
     cout << m_matrices[choice].det() << endl;
 }
 
+void MatricesHolder::clear() {
+    m_matrices.clear();
+    cout << "Cleard matrices." << endl;
+}
+
 void MatricesHolder::run() {
     int op = 0;
     while(1) {
@@ -251,9 +319,10 @@ void MatricesHolder::run() {
         cout << "4. See row-echelon form" <<endl;
         cout << "5. See reduced row-echelon form" << endl;
         cout << "6. Calculate determinant" << endl;
+        cout << "7. Clear stored matrices" << endl;
         cout << "0. Quit" << endl;
         cout << ": ";
-        op = getInt(0, 6);
+        op = getInt(0, 7);
         switch(op) {
         case 1: {
             this->add();
@@ -277,6 +346,10 @@ void MatricesHolder::run() {
         }
         case 6: {
             this->det();
+            break;
+        }
+        case 7: {
+            this->clear();
             break;
         }
         case 0: {

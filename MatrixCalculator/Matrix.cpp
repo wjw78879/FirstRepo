@@ -49,12 +49,12 @@ ostream& operator<< (ostream& o, const Matrix& mat) {
         cout << "| ";
         for(int c = 0; c < mat.m_cols; c++) {
             size_t strLen = strVec[r][c].length();
-            for(int i = 0; i < (maxLength[c] - strLen) / 2; i++)cout << " ";
-            cout << strVec[r][c];
             int times = 0;
             if((maxLength[c] - strLen) % 2 == 0)times = (maxLength[c] - strLen) / 2;
             else times = (maxLength[c] - strLen) / 2 + 1;
-            for(int i = 0; i < times + 1; i++)cout << " ";
+            for(int i = 0; i < times; i++)cout << " ";
+            cout << strVec[r][c];
+            for(int i = 0; i < maxLength[c] - strLen - times + 1; i++)cout << " ";
         }
         cout << "|" << endl;
     }
@@ -119,6 +119,14 @@ Matrix::Matrix(const Matrix& other) {
     m_data = other.data();
     m_rows = other.rows();
     m_cols = other.cols();
+}
+
+Matrix::Matrix(const double value) {
+    vector<double> row;
+    row.push_back(value);
+    m_data.push_back(row);
+    m_rows = 1;
+    m_cols = 1;
 }
 
 Matrix::~Matrix() {}
@@ -335,12 +343,12 @@ void Matrix::print() {
         cout << "| ";
         for(int c = 0; c < m_cols; c++) {
             size_t strLen = strVec[r][c].length();
-            for(int i = 0; i < (maxLength[c] - strLen) / 2; i++)cout << " ";
-            cout << strVec[r][c];
             int times = 0;
             if((maxLength[c] - strLen) % 2 == 0)times = (maxLength[c] - strLen) / 2;
             else times = (maxLength[c] - strLen) / 2 + 1;
-            for(int i = 0; i < times + 1; i++)cout << " ";
+            for(int i = 0; i < times; i++)cout << " ";
+            cout << strVec[r][c];
+            for(int i = 0; i < maxLength[c] - strLen - times + 1; i++)cout << " ";
         }
         cout << "|" << endl;
     }

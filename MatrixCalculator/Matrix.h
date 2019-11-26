@@ -14,6 +14,7 @@ public:
     Matrix(vector<vector<double>>& values, int rows, int cols);
     Matrix(double* values, int rows, int cols);
     Matrix(const Matrix& other);
+    Matrix(const double value);
     ~Matrix();
 
     void set(double value, int row, int col);
