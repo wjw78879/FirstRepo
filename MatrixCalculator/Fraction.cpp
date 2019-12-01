@@ -1,7 +1,6 @@
 #include "Fraction.h"
 #include<iostream>
 #include<cassert>
-#include<Eigen/Core>
 
 using namespace std;
 
