@@ -4,6 +4,8 @@
 #include<iostream>
 #include<vector>
 
+const double epsilon = 0.000001f;
+
 using namespace std;
 
 class Matrix {
@@ -41,8 +43,8 @@ public:
     Matrix& rowOperationInterchange(int row1, int row2);
     Matrix& rowOperationAdd(double scalar, int from, int to);
 
-    Matrix& rowEchelonForm();
-    Matrix& reducedRowEchelonForm();
+    Matrix rowEchelonForm();
+    Matrix reducedRowEchelonForm();
 
     void print();
 private:

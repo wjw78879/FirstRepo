@@ -19,7 +19,6 @@ Matrix operator* (double lhs, Matrix rhs) {
 }
 
 ostream& operator<< (ostream& o, const Matrix& mat) {
-    double epsilon = 0.000001f;
     vector<vector<string>> strVec;
     for(int r = 0; r < mat.m_rows; r++) {
         vector<string> temp;
@@ -300,16 +299,12 @@ Matrix& Matrix::rowOperationAdd(double scalar, int from, int to) {
     return (*this);
 }
 
-Matrix& Matrix::rowEchelonForm() {
-    Matrix ref(rowEchelon((*this), 0, 0));
-    m_data = ref.data();
-    return (*this);
+Matrix Matrix::rowEchelonForm() {
+    return rowEchelon((*this), 0, 0);
 }
 
-Matrix& Matrix::reducedRowEchelonForm() {
-    Matrix rref(reducedRowEchelon(*this));
-    m_data = rref.data();
-    return (*this);
+Matrix Matrix::reducedRowEchelonForm() {
+    return reducedRowEchelon(*this);
 }
 
 void Matrix::print() {
@@ -358,21 +353,27 @@ void Matrix::print() {
 }
 
 Matrix rowEchelon(Matrix matrix, int proceedRows, int proceedCols) {
+    //cout << "currently executing: " << endl << matrix << "Proceed rows: " << proceedRows << endl << "Proceed cols: " << proceedCols << endl;
+    //cout << "checking leading 1s..." << endl;
     for(int r = proceedRows; r < matrix.rows(); r++) {
-        if(matrix[r][proceedCols] != 0) {
+        if(fabs(matrix[r][proceedCols] - 0) > epsilon) {
             if(r != proceedRows)matrix.rowOperationInterchange(proceedRows, r);
             break;
         }
     }
-    if(matrix[proceedRows][proceedCols] == 0) {
+    //cout << "checking 0 cols..." << endl;
+    if(fabs(matrix[proceedRows][proceedCols] - 0) < epsilon) {
         if(proceedCols == (matrix.cols() - 1))return matrix;
         return rowEchelon(matrix, proceedRows, proceedCols + 1);
     }
+    //cout << "operating..." << endl;
     matrix.rowOperationMultiply(1.0f / matrix[proceedRows][proceedCols], proceedRows);
     for(int r = proceedRows + 1; r < matrix.rows(); r++) {
         matrix.rowOperationAdd(-1.0f * matrix[r][proceedCols] / matrix[proceedRows][proceedCols], proceedRows, r);
     }
+    //cout << "checking end of execute..." << endl;
     if(proceedRows == (matrix.rows() - 1) || proceedCols == (matrix.cols() - 1))return matrix;
+    //cout << "No." << endl << endl;
     return rowEchelon(matrix, proceedRows + 1, proceedCols + 1);
 }
 
