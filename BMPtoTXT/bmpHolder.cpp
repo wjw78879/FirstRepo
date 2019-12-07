@@ -142,8 +142,8 @@ bool bmpHolder::readTXT(const char* path, const unsigned int& rows, const unsign
     for(int r = rows - 1; r >= 0; r--) {
         for(int c = 0; c < cols; c++) {
             fscanf(file, "%f", &temp);
-            if(temp < 0)temp = 0.0f;
-            if(temp > 1)temp = 1.0f;
+            if(temp < 0.0f)temp = 0.0f;
+            if(temp > 1.0f)temp = 1.0f;
             m_img.data[r * cols + c].data = (unsigned char)(temp * 255.0f);
         }
     }
