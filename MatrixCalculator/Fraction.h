@@ -2,6 +2,7 @@
 #define FRACTION_H
 
 #include<iostream>
+#include<string>
 
 using namespace std;
 
@@ -15,14 +16,20 @@ public:
 
     Fraction reciprocal();
     double decimals();
+    string str();
 
     Fraction operator+ (const Fraction& rhs);
     Fraction operator- (const Fraction& rhs);
     Fraction operator* (const Fraction& rhs);
     Fraction operator/ (const Fraction& rhs);
 private:
-    int m_numerator;
-    int m_denominator;
+    Fraction& reduction();
+
+    bool m_positive;
+    unsigned int m_numerator;
+    unsigned int m_denominator;
 };
+
+unsigned int gcd(unsigned int m, unsigned int n);
 
 #endif
